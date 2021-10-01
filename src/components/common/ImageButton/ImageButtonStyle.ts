@@ -9,6 +9,9 @@ export const useStyles = makeStyles(() => createStyles({
         margin: 10,
         width: 'fit-content'
     },
+    image: {
+        maxWidth: 1000
+    }
 }))
 
 export const CustomImageButton = styled(ButtonBase)(({ theme }) => ({

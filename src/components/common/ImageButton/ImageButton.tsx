@@ -50,7 +50,7 @@ const ImageButton: React.FC<Props> = (props) => {
       >
         <DialogContent>
           <Typography>{ship.name}</Typography>
-          <img src={ship.image} alt={ship.name} />
+          <img className={classes.image} src={ship.image} alt={ship.name} />
         </DialogContent>
       </Dialog>
     </Paper>

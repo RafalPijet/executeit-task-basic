@@ -5,7 +5,7 @@ export const useStyles = makeStyles(() => createStyles({
     root: {
         margin: '10px 0',
         padding: 10,
-        maxWidth: 200,
+        width: 200,
         cursor: 'pointer'
     },
     selected: {

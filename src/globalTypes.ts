@@ -10,3 +10,8 @@ export interface Launch {
     description: string;
     images: Ship[];
 }
+
+export interface SelectedLaunch {
+    id: string,
+    name: string
+}

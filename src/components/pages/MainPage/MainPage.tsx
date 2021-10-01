@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
-import { Paper, Grid } from '@mui/material';
+import { Paper, Grid, CircularProgress } from '@mui/material';
 import LaunchesList from '../../features/LaunchesList/LaunchesList';
 import LaunchContent from '../../features/LaunchContent/LaunchContent';
+import Footer from '../../features/Footer/Footer';
 import { Launch, Ship } from '../../../globalTypes';
 import { useStyles } from './MainPageStyle';
 
@@ -10,6 +11,7 @@ const MainPage: React.FC = () => {
   const classes = useStyles();
   const [data, setData] = useState<Launch[] | null>(null);
   const [chosenLaunch, setChosenLaunch] = useState<Launch | null>(null);
+  const [isPending, setIsPending] = useState<boolean>(false);
 
   useEffect(() => {
     const prepareData = async () => {
@@ -46,9 +48,10 @@ const MainPage: React.FC = () => {
 
   const prepareImages = (launch: Launch) => {
     let shipImages: Ship[] = [];
+    setIsPending(true);
     launch.images.forEach(async (item: Ship) => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 800));
         const res: AxiosResponse = await axios.get(
           `https://api.spacex.land/rest/ship/${item.id}`
         );
@@ -66,7 +69,9 @@ const MainPage: React.FC = () => {
           description: launch.description,
           images: shipImages,
         });
+        setIsPending(false);
       } catch (err: any) {
+        setIsPending(false);
         console.log(err.response);
       }
     });
@@ -85,8 +90,8 @@ const MainPage: React.FC = () => {
   return (
     <div className={classes.container}>
       <Paper elevation={3}>
-        <Grid container>
-          <Grid item xs={12} sm={12} lg={3}>
+        <Grid container style={{ minHeight: 640 }}>
+          <Grid item xs={12} sm={12} lg={3} className={classes.content}>
             {data !== null && chosenLaunch !== null ? (
               <LaunchesList
                 chosenId={chosenLaunch.id}
@@ -94,16 +99,19 @@ const MainPage: React.FC = () => {
                 getChosenId={chosenItemHandling}
               />
             ) : (
-              <p>Null</p>
+              <CircularProgress />
             )}
           </Grid>
-          <Grid item xs={12} sm={12} lg={9}>
-            {chosenLaunch !== null ? (
-              <LaunchContent content={chosenLaunch} />
+          <Grid item xs={12} sm={12} lg={9} className={classes.content}>
+            {isPending || chosenLaunch === null ? (
+              <CircularProgress />
             ) : (
-              <p>Null content</p>
+              <LaunchContent content={chosenLaunch} />
             )}
-            <button onClick={() => console.log(chosenLaunch)}>Click</button>
+            {/* <button onClick={() => console.log(chosenLaunch)}>Click</button> */}
+          </Grid>
+          <Grid item xs={12} sm={12} lg={12}>
+            <Footer />
           </Grid>
         </Grid>
       </Paper>

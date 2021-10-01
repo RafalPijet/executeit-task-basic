@@ -8,10 +8,12 @@ const LaunchContent: React.FC<Props> = (props) => {
   const { id, name, description, images } = props.content;
   const classes = useStyles();
   return (
-    <Paper elevation={3}>
-      <Grid container>
-        <Grid item xs={12} sm={12} lg={12}>
-          <Typography>{name}</Typography>
+    <Paper elevation={3} className={classes.root}>
+      <Grid container className={classes.content}>
+        <Grid item xs={12} sm={12} lg={12} className={classes.contentBox}>
+          <Typography variant="h6" textAlign="center">
+            {name}
+          </Typography>
           <Typography>{description}</Typography>
           <div className={classes.buttonList}>
             {images.map((ship: Ship) => {
