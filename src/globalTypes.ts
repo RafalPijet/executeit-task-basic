@@ -5,6 +5,7 @@ export interface Ship {
 }
 
 export interface Launch {
+    id: string;
     name: string;
     description: string;
     images: Ship[];

@@ -29,6 +29,7 @@ const defaultFont = {
 };
 
 const primaryBackground = "#584f4f";
+const selectedBackground = "#bcbcbc";
 const primaryColor = "#9c27b0";
 const dangerColor = "#f44336";
 const successColor = "#4caf50";
@@ -38,6 +39,7 @@ export {
     container,
     defaultFont,
     primaryBackground,
+    selectedBackground,
     primaryColor,
     dangerColor,
     successColor
