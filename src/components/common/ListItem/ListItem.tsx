@@ -16,7 +16,7 @@ const ListItem: React.FC<Props> = (props) => {
   return (
     <Paper
       className={rootClasses}
-      elevation={selectedItem === itemId ? 2 : 5}
+      elevation={selectedItem === itemId ? 2 : 8}
       onClick={() => getItemId(itemId)}
     >
       <Typography>{cutText(name, 25)}</Typography>

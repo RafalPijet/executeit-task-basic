@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
+import classNames from 'classnames';
 import { Paper, Grid, CircularProgress } from '@mui/material';
 import LaunchesList from '../../features/LaunchesList/LaunchesList';
 import LaunchContent from '../../features/LaunchContent/LaunchContent';
 import Footer from '../../features/Footer/Footer';
-import { Launch, Ship } from '../../../globalTypes';
+import { Launch, Ship, SelectedLaunch } from '../../../globalTypes';
 import { useStyles } from './MainPageStyle';
 
 const MainPage: React.FC = () => {
   const classes = useStyles();
   const [data, setData] = useState<Launch[] | null>(null);
+  const [page, setPage] = useState<number>(0);
   const [chosenLaunch, setChosenLaunch] = useState<Launch | null>(null);
+  const [foundLaunch, setFoundLaunch] = useState<SelectedLaunch | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
 
   useEffect(() => {
     const prepareData = async () => {
       try {
         const res: AxiosResponse = await axios.get(
-          'https://api.spacex.land/rest/launches?limit=10&offset=10'
+          `https://api.spacex.land/rest/launches?limit=10&offset=${page * 10}`
         );
         if (res.data) {
           const result = res.data.map((item: any) => {
@@ -30,15 +33,15 @@ const MainPage: React.FC = () => {
           });
           setData(result);
         }
-
-        console.log('End');
       } catch (err: any) {
         console.log(err.response);
         console.log('Error');
       }
     };
-    prepareData();
-  }, []);
+    if (foundLaunch === null) {
+      prepareData();
+    }
+  }, [page, foundLaunch]);
 
   useEffect(() => {
     if (data !== null) {
@@ -46,35 +49,73 @@ const MainPage: React.FC = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (foundLaunch !== null) {
+      (async () => {
+        try {
+          setIsPending(true);
+          const res: AxiosResponse = await axios.get(
+            `https://api.spacex.land/rest/launches?find={"mission_name": "${foundLaunch.name}"}`
+          );
+          if (res.data.length) {
+            const result = res.data.map((item: any) => {
+              return {
+                id: item.id,
+                name: item.mission_name,
+                description: item.details,
+                images: item.ships,
+              };
+            });
+            setData(result);
+            setIsPending(false);
+          }
+        } catch (err: any) {
+          setIsPending(false);
+          console.log(err.response);
+          console.log('Error');
+        }
+      })();
+    }
+  }, [foundLaunch]);
+
   const prepareImages = (launch: Launch) => {
-    let shipImages: Ship[] = [];
-    setIsPending(true);
-    launch.images.forEach(async (item: Ship) => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        const res: AxiosResponse = await axios.get(
-          `https://api.spacex.land/rest/ship/${item.id}`
-        );
+    if (launch.images.length) {
+      let shipImages: Ship[] = [];
+      setIsPending(true);
+      launch.images.forEach(async (item: Ship) => {
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          const res: AxiosResponse = await axios.get(
+            `https://api.spacex.land/rest/ship/${item.id}`
+          );
 
-        const result = {
-          id: item.id,
-          name: res.data.name,
-          image: res.data.image,
-        };
+          const result = {
+            id: item.id,
+            name: res.data.name,
+            image: res.data.image,
+          };
 
-        shipImages = [...shipImages, result];
-        setChosenLaunch({
-          id: launch.id,
-          name: launch.name,
-          description: launch.description,
-          images: shipImages,
-        });
-        setIsPending(false);
-      } catch (err: any) {
-        setIsPending(false);
-        console.log(err.response);
-      }
-    });
+          shipImages = [...shipImages, result];
+          setChosenLaunch({
+            id: launch.id,
+            name: launch.name,
+            description: launch.description,
+            images: shipImages,
+          });
+          setIsPending(false);
+        } catch (err: any) {
+          setIsPending(false);
+          console.log(err.response);
+        }
+      });
+    } else {
+      setChosenLaunch({
+        id: launch.id,
+        name: launch.name,
+        description: launch.description,
+        images: [],
+      });
+    }
   };
 
   const chosenItemHandling = (id: string) => {
@@ -84,34 +125,60 @@ const MainPage: React.FC = () => {
         prepareImages(result);
       }
     }
-    console.log(id);
+  };
+
+  const changePageHandling = (page: number) => {
+    setPage(page);
+    setData(null);
+  };
+
+  const chosenLaunchHandling = (item: SelectedLaunch | null) => {
+    setFoundLaunch(item);
   };
 
   return (
     <div className={classes.container}>
-      <Paper elevation={3}>
-        <Grid container style={{ minHeight: 640 }}>
-          <Grid item xs={12} sm={12} lg={3} className={classes.content}>
+      <Paper elevation={3} className={classes.root}>
+        <Grid container>
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            lg={3}
+            style={{ minHeight: 660 }}
+            className={classes.content}
+          >
             {data !== null && chosenLaunch !== null ? (
               <LaunchesList
+                isAvailable={foundLaunch === null}
                 chosenId={chosenLaunch.id}
                 launches={data}
                 getChosenId={chosenItemHandling}
               />
             ) : (
-              <CircularProgress />
+              <div className={classNames(classes.content, classes.center)}>
+                <CircularProgress color="warning" />
+              </div>
             )}
           </Grid>
-          <Grid item xs={12} sm={12} lg={9} className={classes.content}>
+          <Grid
+            item
+            xs={12}
+            sm={12}
+            lg={9}
+            className={classNames(classes.content, classes.center)}
+          >
             {isPending || chosenLaunch === null ? (
               <CircularProgress />
             ) : (
               <LaunchContent content={chosenLaunch} />
             )}
-            {/* <button onClick={() => console.log(chosenLaunch)}>Click</button> */}
           </Grid>
           <Grid item xs={12} sm={12} lg={12}>
-            <Footer />
+            <Footer
+              getPage={changePageHandling}
+              getChosedLaunch={chosenLaunchHandling}
+            />
           </Grid>
         </Grid>
       </Paper>

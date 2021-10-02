@@ -29,7 +29,10 @@ const defaultFont = {
 };
 
 const primaryBackground = "#584f4f";
-const selectedBackground = "#bcbcbc";
+const secondaryBackground = "#d9d2e9";
+const listBackground = "#eaf7e5";
+const buttonBackground = "rgba(255,232,164, .8)";
+const footerBackground = "#ffe8a4";
 const primaryColor = "#9c27b0";
 const dangerColor = "#f44336";
 const successColor = "#4caf50";
@@ -39,7 +42,10 @@ export {
     container,
     defaultFont,
     primaryBackground,
-    selectedBackground,
+    secondaryBackground,
+    listBackground,
+    buttonBackground,
+    footerBackground,
     primaryColor,
     dangerColor,
     successColor

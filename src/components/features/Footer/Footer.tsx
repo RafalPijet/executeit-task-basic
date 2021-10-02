@@ -4,16 +4,36 @@ import axios, { AxiosResponse } from 'axios';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CustomPagination from '../../common/CustomPagination/CustomPagination';
 import { SelectedLaunch } from '../../../globalTypes';
-import { useStyles } from './FooterStyle';
+import { useStyles, Props } from './FooterStyle';
 
-const Footer: React.FC = () => {
+const Footer: React.FC<Props> = (props) => {
+  const { getPage, getChosedLaunch } = props;
   const classes = useStyles();
+  const [quantity, setQuantity] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [open, setOpen] = useState<boolean>(false);
-  const [options, setOptions] = useState<any[]>([]);
+  const [options, setOptions] = useState<SelectedLaunch[]>([]);
   const [launchName, setLaunchName] = useState<SelectedLaunch | null>(null);
   const loading = open && options.length === 0;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res: AxiosResponse = await axios.get(
+          `https://api.spacex.land/rest/launches`
+        );
+        if (res.data) {
+          setQuantity(res.data.length);
+        }
+      } catch (err: any) {
+        console.log(err.response);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    getChosedLaunch(launchName);
+  }, [launchName]);
 
   useEffect(() => {
     let active = true;
@@ -52,13 +72,7 @@ const Footer: React.FC = () => {
     newPage: number
   ) => {
     setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    getPage(newPage);
   };
 
   const selectedItemHandling = (
@@ -69,16 +83,14 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <Paper elevation={3} className={classes.root}>
+    <Paper elevation={20} className={classes.root}>
       <Grid container justifyContent="center">
         <Grid item xs={12} sm={12} lg={6} className={classes.content}>
           <CustomPagination
-            rowsPerPageOptions={[10]}
-            quantity={options.length}
+            quantity={quantity}
             onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
             page={page}
-            rowsPerPage={rowsPerPage}
+            isHidden={launchName !== null}
           />
         </Grid>
         <Grid item xs={12} sm={12} lg={6} className={classes.content}>

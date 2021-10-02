@@ -6,11 +6,6 @@ export interface Props {
         event: MouseEvent<HTMLButtonElement> | null,
         newPage: number
     ) => void;
-    onChangeRowsPerPage: (
-        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => void;
-    rowsPerPage: number;
     page: number;
     isHidden?: boolean;
-    rowsPerPageOptions: number[],
 }

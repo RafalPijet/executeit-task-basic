@@ -3,25 +3,16 @@ import TablePagination from '@mui/material/TablePagination';
 import { Props } from './CustomPaginationStyle';
 
 const CustomPagination: React.FC<Props> = (props) => {
-  const {
-    quantity,
-    rowsPerPage,
-    page,
-    onChangePage,
-    onChangeRowsPerPage,
-    isHidden,
-    rowsPerPageOptions,
-  } = props;
+  const { quantity, page, onChangePage, isHidden } = props;
   return (
     <TablePagination
       hidden={isHidden}
-      rowsPerPageOptions={rowsPerPageOptions}
+      rowsPerPageOptions={[10]}
       component="div"
       count={quantity}
-      rowsPerPage={rowsPerPage}
+      rowsPerPage={10}
       page={page}
       onPageChange={onChangePage}
-      onRowsPerPageChange={onChangeRowsPerPage}
     />
   );
 };
