@@ -171,7 +171,10 @@ const MainPage: React.FC = () => {
             {isPending || chosenLaunch === null ? (
               <CircularProgress />
             ) : (
-              <LaunchContent content={chosenLaunch} />
+              <LaunchContent
+                content={chosenLaunch}
+                chosenId={chosenLaunch.id}
+              />
             )}
           </Grid>
           <Grid item xs={12} sm={12} lg={12}>

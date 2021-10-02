@@ -19,8 +19,19 @@ export const useStyles = makeStyles(() => createStyles({
         alignItems: 'center',
         flexWrap: 'wrap'
     },
+    display: {
+        display: 'flex',
+        alignItems: 'center',
+    },
+    center: {
+        justifyContent: 'center',
+    },
+    right: {
+        justifyContent: 'flex-end'
+    }
 }))
 
 export interface Props {
-    content: Launch
+    content: Launch;
+    chosenId: string;
 }
