@@ -129,7 +129,7 @@ const Footer: React.FC<Props> = (props) => {
           />
           <Favorite
             fontSize="medium"
-            color="secondary"
+            color={isPending || launchName === null ? 'secondary' : 'disabled'}
             style={{ paddingLeft: 10 }}
           />
         </Grid>

@@ -26,7 +26,7 @@ const LaunchesList: React.FC<Props> = (props) => {
   };
 
   return (
-    <Paper elevation={4}>
+    <Paper elevation={4} style={{ width: '100%' }}>
       <Grid container>
         <Grid item xs={12} sm={12} lg={12}>
           <div className={classes.list}>
@@ -48,7 +48,7 @@ const LaunchesList: React.FC<Props> = (props) => {
                 <Typography variant="h6" color="blue">
                   {isFavorites
                     ? 'Favorites folder is empty'
-                    : "List doesn't available"}
+                    : "The list isn't available"}
                 </Typography>
               </div>
             )}

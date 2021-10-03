@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import classNames from 'classnames';
+import { useSnackbar } from 'notistack';
 import { Paper, Grid, CircularProgress, Typography } from '@mui/material';
 import LaunchesList from '../../features/LaunchesList/LaunchesList';
 import LaunchContent from '../../features/LaunchContent/LaunchContent';
@@ -10,6 +11,7 @@ import { useStyles } from './MainPageStyle';
 
 const MainPage: React.FC = () => {
   const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
   const [data, setData] = useState<Launch[] | null>(null);
   const [favoritesData, setFavoritesData] = useState<Launch[] | null>(null);
   const [page, setPage] = useState<number>(0);
@@ -38,20 +40,26 @@ const MainPage: React.FC = () => {
           setIsPending(false);
         }
       } catch (err: any) {
-        console.log(err.response);
-        console.log('Error');
+        enqueueSnackbar(
+          err.response.data.message
+            ? err.response.data.message
+            : 'Something went wrong',
+          { variant: 'error' }
+        );
         setIsPending(false);
       }
     };
     if (foundLaunch === null) {
       prepareData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, foundLaunch]);
 
   useEffect(() => {
     if (data !== null) {
       prepareImages(data[0]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   useEffect(() => {
@@ -75,12 +83,17 @@ const MainPage: React.FC = () => {
             setIsPending(false);
           }
         } catch (err: any) {
+          enqueueSnackbar(
+            err.response.data.message
+              ? err.response.data.message
+              : 'Something went wrong',
+            { variant: 'error' }
+          );
           setIsPending(false);
-          console.log(err.response);
-          console.log('Error');
         }
       })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foundLaunch]);
 
   useEffect(() => {
@@ -130,8 +143,13 @@ const MainPage: React.FC = () => {
           });
           setIsPending(false);
         } catch (err: any) {
+          enqueueSnackbar(
+            err.response.data.message
+              ? err.response.data.message
+              : 'Something went wrong',
+            { variant: 'error' }
+          );
           setIsPending(false);
-          console.log(err.response);
         }
       });
     } else {

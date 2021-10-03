@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
+import { useSnackbar } from 'notistack';
 import {
   Paper,
   Grid,
@@ -18,6 +19,7 @@ const LaunchContent: React.FC<Props> = (props) => {
   const { id, name, description, images } = props.content;
   const { chosenId, getRemovedId, isFavorites } = props;
   const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
   const [isAddDisabled, setIsAddDisabled] = useState<boolean>(false);
   const [isRemoveDisabled, setIsRemoveDisabled] = useState<boolean>(false);
 
@@ -64,9 +66,13 @@ const LaunchContent: React.FC<Props> = (props) => {
           ];
           localStorage.setItem('launchesStorage', JSON.stringify(favorites));
           setIsAddDisabled(true);
+          if (favorites.length === 10) {
+            enqueueSnackbar(
+              'You have reached the maximum number of 10 items in the FAVORITES folder',
+              { variant: 'info' }
+            );
+          }
         }
-      } else {
-        console.log(favorites);
       }
     } else {
       const preparedData = [
