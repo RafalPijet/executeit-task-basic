@@ -11,28 +11,28 @@ import {
 import { AddCircle, RemoveCircle, Favorite } from '@mui/icons-material';
 import ImageButton from '../../common/ImageButton/ImageButton';
 import { Ship, Launch } from '../../../globalTypes';
+import image from '../../../images/noImage.png';
 import { Props, useStyles } from './LaunchContentStyle';
 
 const LaunchContent: React.FC<Props> = (props) => {
   const { id, name, description, images } = props.content;
-  const { chosenId } = props;
+  const { chosenId, getRemovedId, isFavorites } = props;
   const classes = useStyles();
   const [isAddDisabled, setIsAddDisabled] = useState<boolean>(false);
   const [isRemoveDisabled, setIsRemoveDisabled] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsRemoveDisabled(!isFavorites);
     const stringFavorites = localStorage.getItem('launchesStorage');
     if (stringFavorites !== null) {
       let favorites: Launch[] = JSON.parse(stringFavorites);
-      if (favorites.length >= 10) {
-        setIsAddDisabled(true);
-      } else {
-        const result = favorites.find((item: Launch) => item.id === id);
-        setIsAddDisabled(result !== undefined);
-        setIsRemoveDisabled(result === undefined);
-      }
+      const result = favorites.find((item: Launch) => item.id === id);
+      favorites.length >= 10
+        ? setIsAddDisabled(true)
+        : setIsAddDisabled(result !== undefined);
     }
-  }, [chosenId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chosenId, isFavorites]);
 
   const removeFromLocalStorageHandling = () => {
     const stringFavorites = localStorage.getItem('launchesStorage');
@@ -42,6 +42,7 @@ const LaunchContent: React.FC<Props> = (props) => {
       localStorage.setItem('launchesStorage', JSON.stringify(favorites));
       setIsAddDisabled(false);
       setIsRemoveDisabled(true);
+      getRemovedId(id);
     }
   };
 
@@ -49,7 +50,7 @@ const LaunchContent: React.FC<Props> = (props) => {
     const stringFavorites = localStorage.getItem('launchesStorage');
     if (stringFavorites !== null) {
       let favorites: Launch[] = JSON.parse(stringFavorites);
-      if (favorites?.length && favorites.length < 10) {
+      if (favorites.length < 10) {
         const result = favorites.find((item: Launch) => item.id === id);
         if (result === undefined) {
           favorites = [
@@ -63,10 +64,9 @@ const LaunchContent: React.FC<Props> = (props) => {
           ];
           localStorage.setItem('launchesStorage', JSON.stringify(favorites));
           setIsAddDisabled(true);
-          setIsRemoveDisabled(false);
         }
       } else {
-        console.log('Toust');
+        console.log(favorites);
       }
     } else {
       const preparedData = [
@@ -79,7 +79,6 @@ const LaunchContent: React.FC<Props> = (props) => {
       ];
       localStorage.setItem('launchesStorage', JSON.stringify(preparedData));
       setIsAddDisabled(true);
-      setIsRemoveDisabled(false);
     }
   };
 
@@ -110,45 +109,61 @@ const LaunchContent: React.FC<Props> = (props) => {
           lg={2}
           className={classNames(classes.display, classes.center)}
         >
-          <Tooltip
-            title="Add to favorites"
-            arrow
-            TransitionComponent={Zoom}
-            enterDelay={1000}
-          >
-            <span>
-              <IconButton
-                size="small"
-                onClick={addToLocalStorageHandling}
-                disabled={isAddDisabled}
-              >
-                <AddCircle color={isAddDisabled ? 'disabled' : 'success'} />
-              </IconButton>
-            </span>
-          </Tooltip>
+          {!isFavorites && (
+            <Tooltip
+              title="Add to favorites"
+              arrow
+              TransitionComponent={Zoom}
+              enterDelay={1000}
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={addToLocalStorageHandling}
+                  disabled={isAddDisabled}
+                >
+                  <AddCircle color={isAddDisabled ? 'disabled' : 'success'} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           <Favorite fontSize="large" color="secondary" />
-          <Tooltip
-            title="Remove from favorites"
-            arrow
-            TransitionComponent={Zoom}
-            enterDelay={1000}
-          >
-            <span>
-              <IconButton
-                size="small"
-                onClick={removeFromLocalStorageHandling}
-                disabled={isRemoveDisabled}
-              >
-                <RemoveCircle color={isRemoveDisabled ? 'disabled' : 'error'} />
-              </IconButton>
-            </span>
-          </Tooltip>
+          {isFavorites && (
+            <Tooltip
+              title="Remove from favorites"
+              arrow
+              TransitionComponent={Zoom}
+              enterDelay={1000}
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={removeFromLocalStorageHandling}
+                  disabled={isRemoveDisabled}
+                >
+                  <RemoveCircle
+                    color={isRemoveDisabled ? 'disabled' : 'error'}
+                  />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </Grid>
       </Grid>
       <Grid container className={classes.content}>
-        <Grid item xs={12} sm={12} lg={12}>
+        <Grid
+          item
+          xs={12}
+          sm={12}
+          lg={12}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-around',
+          }}
+        >
           {description !== null && description.length ? (
-            <Typography>{description}</Typography>
+            <Typography textAlign="center">{description}</Typography>
           ) : (
             <Typography textAlign="center" color="red">
               Description doesn't available
@@ -157,15 +172,11 @@ const LaunchContent: React.FC<Props> = (props) => {
 
           <div className={classes.buttonList}>
             {images !== null && images.length ? (
-              images.map((ship: Ship) => {
-                return (
-                  <ImageButton key={`${ship.id}-${ship.name}`} ship={ship} />
-                );
+              images.map((ship: Ship, index) => {
+                return <ImageButton key={`${ship.id}-${index}`} ship={ship} />;
               })
             ) : (
-              <Typography textAlign="center" color="red">
-                Images aren't available
-              </Typography>
+              <img src={image} alt="no-content" />
             )}
           </div>
         </Grid>

@@ -11,6 +11,9 @@ export const useStyles = makeStyles(() => createStyles({
     },
     selected: {
         backgroundColor: `${listBackground} !important`
+    },
+    pending: {
+        cursor: 'progress'
     }
 }))
 
@@ -19,4 +22,5 @@ export interface Props {
     name: string;
     selectedItem: string;
     getItemId: (id: string) => void;
+    isPending: boolean;
 }

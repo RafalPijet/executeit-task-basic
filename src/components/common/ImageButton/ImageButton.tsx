@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Paper, Typography } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+import image from '../../../images/noImage.png';
 import {
   CustomImageButton,
   ImageSrc,
@@ -25,7 +26,11 @@ const ImageButton: React.FC<Props> = (props) => {
           width: 200,
         }}
       >
-        <ImageSrc style={{ backgroundImage: `url(${ship.image})` }} />
+        <ImageSrc
+          style={{
+            backgroundImage: `url(${ship.image !== null ? ship.image : image})`,
+          }}
+        />
         <ImageBackdrop className="MuiImageBackdrop-root" />
         <Image>
           <Typography
@@ -50,7 +55,11 @@ const ImageButton: React.FC<Props> = (props) => {
       >
         <DialogContent>
           <Typography>{ship.name}</Typography>
-          <img className={classes.image} src={ship.image} alt={ship.name} />
+          <img
+            className={classes.image}
+            src={ship.image !== null ? ship.image : image}
+            alt={ship.name}
+          />
         </DialogContent>
       </Dialog>
     </Paper>

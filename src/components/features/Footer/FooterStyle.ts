@@ -18,4 +18,6 @@ export const useStyles = makeStyles(() => createStyles({
 export interface Props {
     getPage: (page: number) => void;
     getChosedLaunch: (item: SelectedLaunch | null) => void;
+    getIsFavorites: (isTrue: boolean) => void;
+    isPending: boolean;
 }

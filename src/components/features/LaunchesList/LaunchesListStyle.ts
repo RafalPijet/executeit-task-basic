@@ -18,8 +18,10 @@ export const useStyles = makeStyles(() => createStyles({
 }))
 
 export interface Props {
-    launches: Omit<Launch, 'description' | 'images'>[];
+    launches: Omit<Launch, 'description' | 'images'>[] | null;
     chosenId: string;
     getChosenId: (id: string) => void;
     isAvailable: boolean;
+    isPending: boolean;
+    isFavorites: boolean;
 }

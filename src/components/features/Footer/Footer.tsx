@@ -15,12 +15,12 @@ import { SelectedLaunch } from '../../../globalTypes';
 import { useStyles, Props } from './FooterStyle';
 
 const Footer: React.FC<Props> = (props) => {
-  const { getPage, getChosedLaunch } = props;
+  const { getPage, getChosedLaunch, getIsFavorites, isPending } = props;
   const classes = useStyles();
   const [quantity, setQuantity] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [open, setOpen] = useState<boolean>(false);
-  const [isAPI, setIsAPI] = useState<boolean>(false);
+  const [isFavorites, setIsFavorites] = useState<boolean>(false);
   const [options, setOptions] = useState<SelectedLaunch[]>([]);
   const [launchName, setLaunchName] = useState<SelectedLaunch | null>(null);
   const loading = open && options.length === 0;
@@ -42,7 +42,13 @@ const Footer: React.FC<Props> = (props) => {
 
   useEffect(() => {
     getChosedLaunch(launchName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [launchName]);
+
+  useEffect(() => {
+    getIsFavorites(isFavorites);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFavorites]);
 
   useEffect(() => {
     let active = true;
@@ -80,8 +86,10 @@ const Footer: React.FC<Props> = (props) => {
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) => {
-    setPage(newPage);
-    getPage(newPage);
+    if (!isPending) {
+      setPage(newPage);
+      getPage(newPage);
+    }
   };
 
   const selectedItemHandling = (
@@ -92,7 +100,7 @@ const Footer: React.FC<Props> = (props) => {
   };
 
   const changeSourceHandling = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsAPI(event.target.checked);
+    setIsFavorites(event.target.checked);
   };
 
   return (
@@ -103,17 +111,18 @@ const Footer: React.FC<Props> = (props) => {
             quantity={quantity}
             onChangePage={handleChangePage}
             page={page}
-            isHidden={launchName !== null}
+            isHidden={launchName !== null || isFavorites}
           />
         </Grid>
         <Grid item xs={12} sm={12} lg={2} className={classes.content}>
           <FormControlLabel
             labelPlacement="start"
+            disabled={isPending || launchName !== null}
             control={
               <Switch
                 color="secondary"
                 onChange={changeSourceHandling}
-                checked={isAPI}
+                checked={isFavorites}
               />
             }
             label="API"
@@ -127,7 +136,7 @@ const Footer: React.FC<Props> = (props) => {
         <Grid item xs={12} sm={12} lg={6} className={classes.content}>
           <Autocomplete
             style={{ width: '70%' }}
-            // disabled={isUpdating}
+            disabled={isFavorites || isPending}
             id="searcher"
             open={open}
             size="small"

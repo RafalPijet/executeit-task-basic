@@ -1,5 +1,5 @@
 import { makeStyles, createStyles } from '@mui/styles';
-import { container, primaryBackground, secondaryBackground } from '../../../globalStyles';
+import { container, primaryBackground, secondaryBackground, listBackground } from '../../../globalStyles';
 
 export const useStyles = makeStyles(() => createStyles({
     container: {
@@ -20,4 +20,12 @@ export const useStyles = makeStyles(() => createStyles({
     center: {
         justifyContent: 'center',
     },
+    nothing: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100%',
+        width: '100%',
+        backgroundColor: `${listBackground} !important`
+    }
 }))

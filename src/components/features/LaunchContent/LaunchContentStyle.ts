@@ -10,7 +10,7 @@ export const useStyles = makeStyles(() => createStyles({
     },
     content: {
         padding: 10,
-        height: 608,
+        height: 600,
         overflow: 'auto'
     },
     buttonList: {
@@ -28,10 +28,13 @@ export const useStyles = makeStyles(() => createStyles({
     },
     right: {
         justifyContent: 'flex-end'
-    }
+    },
+
 }))
 
 export interface Props {
     content: Launch;
     chosenId: string;
+    getRemovedId: (id: string) => void;
+    isFavorites: boolean;
 }

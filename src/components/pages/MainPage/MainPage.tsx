@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import classNames from 'classnames';
-import { Paper, Grid, CircularProgress } from '@mui/material';
+import { Paper, Grid, CircularProgress, Typography } from '@mui/material';
 import LaunchesList from '../../features/LaunchesList/LaunchesList';
 import LaunchContent from '../../features/LaunchContent/LaunchContent';
 import Footer from '../../features/Footer/Footer';
@@ -11,14 +11,17 @@ import { useStyles } from './MainPageStyle';
 const MainPage: React.FC = () => {
   const classes = useStyles();
   const [data, setData] = useState<Launch[] | null>(null);
+  const [favoritesData, setFavoritesData] = useState<Launch[] | null>(null);
   const [page, setPage] = useState<number>(0);
   const [chosenLaunch, setChosenLaunch] = useState<Launch | null>(null);
   const [foundLaunch, setFoundLaunch] = useState<SelectedLaunch | null>(null);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [isFavorites, setIsFavorites] = useState<boolean>(false);
 
   useEffect(() => {
     const prepareData = async () => {
       try {
+        setIsPending(true);
         const res: AxiosResponse = await axios.get(
           `https://api.spacex.land/rest/launches?limit=10&offset=${page * 10}`
         );
@@ -32,10 +35,12 @@ const MainPage: React.FC = () => {
             };
           });
           setData(result);
+          setIsPending(false);
         }
       } catch (err: any) {
         console.log(err.response);
         console.log('Error');
+        setIsPending(false);
       }
     };
     if (foundLaunch === null) {
@@ -78,23 +83,44 @@ const MainPage: React.FC = () => {
     }
   }, [foundLaunch]);
 
+  useEffect(() => {
+    if (isFavorites) {
+      const stringFavorites = localStorage.getItem('launchesStorage');
+      if (stringFavorites !== null) {
+        let favorites: Launch[] = JSON.parse(stringFavorites);
+        if (favorites.length) {
+          setFavoritesData(favorites);
+          setChosenLaunch(favorites[0]);
+        } else {
+          setFavoritesData(null);
+          setChosenLaunch(null);
+        }
+      }
+      if (isFavorites && stringFavorites === null) {
+        setChosenLaunch(null);
+      }
+    } else {
+      if (data !== null) {
+        prepareImages(data[0]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFavorites]);
+
   const prepareImages = (launch: Launch) => {
     if (launch.images.length) {
       let shipImages: Ship[] = [];
       setIsPending(true);
       launch.images.forEach(async (item: Ship) => {
         try {
-          await new Promise((resolve) => setTimeout(resolve, 800));
           const res: AxiosResponse = await axios.get(
             `https://api.spacex.land/rest/ship/${item.id}`
           );
-
           const result = {
             id: item.id,
             name: res.data.name,
             image: res.data.image,
           };
-
           shipImages = [...shipImages, result];
           setChosenLaunch({
             id: launch.id,
@@ -119,10 +145,21 @@ const MainPage: React.FC = () => {
   };
 
   const chosenItemHandling = (id: string) => {
-    if (data !== null) {
-      const result = data.find((item: Launch) => item.id === id);
-      if (result) {
-        prepareImages(result);
+    if (isFavorites) {
+      if (favoritesData !== null) {
+        const selectedItem = favoritesData?.find(
+          (item: Launch) => item.id === id
+        );
+        if (selectedItem) {
+          setChosenLaunch(selectedItem);
+        }
+      }
+    } else {
+      if (data !== null) {
+        const result = data.find((item: Launch) => item.id === id);
+        if (result) {
+          prepareImages(result);
+        }
       }
     }
   };
@@ -134,6 +171,24 @@ const MainPage: React.FC = () => {
 
   const chosenLaunchHandling = (item: SelectedLaunch | null) => {
     setFoundLaunch(item);
+  };
+
+  const changeFavoritesHandling = (isFavorites: boolean) => {
+    setIsFavorites(isFavorites);
+  };
+
+  const removeItemFromFavoritesHandling = (id: string) => {
+    if (favoritesData !== null) {
+      let favorites = [...favoritesData];
+      favorites = favorites.filter((item: Launch) => item.id !== id);
+      setFavoritesData(favorites);
+      if (favorites.length) {
+        setChosenLaunch(favorites[0]);
+      } else {
+        setFavoritesData(null);
+        setChosenLaunch(null);
+      }
+    }
   };
 
   return (
@@ -148,12 +203,14 @@ const MainPage: React.FC = () => {
             style={{ minHeight: 660 }}
             className={classes.content}
           >
-            {data !== null && chosenLaunch !== null ? (
+            {data !== null ? (
               <LaunchesList
                 isAvailable={foundLaunch === null}
-                chosenId={chosenLaunch.id}
-                launches={data}
+                chosenId={chosenLaunch !== null ? chosenLaunch.id : ''}
+                launches={isFavorites ? favoritesData : data}
                 getChosenId={chosenItemHandling}
+                isPending={isPending}
+                isFavorites={isFavorites}
               />
             ) : (
               <div className={classNames(classes.content, classes.center)}>
@@ -168,12 +225,20 @@ const MainPage: React.FC = () => {
             lg={9}
             className={classNames(classes.content, classes.center)}
           >
-            {isPending || chosenLaunch === null ? (
+            {isPending ? (
               <CircularProgress />
+            ) : chosenLaunch === null ? (
+              <Paper elevation={4} className={classes.nothing}>
+                <Typography variant="h6" color="blue">
+                  Nothing to show
+                </Typography>
+              </Paper>
             ) : (
               <LaunchContent
                 content={chosenLaunch}
                 chosenId={chosenLaunch.id}
+                getRemovedId={removeItemFromFavoritesHandling}
+                isFavorites={isFavorites}
               />
             )}
           </Grid>
@@ -181,6 +246,8 @@ const MainPage: React.FC = () => {
             <Footer
               getPage={changePageHandling}
               getChosedLaunch={chosenLaunchHandling}
+              getIsFavorites={changeFavoritesHandling}
+              isPending={isPending}
             />
           </Grid>
         </Grid>
